@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Expense Report{% endblock %}
+
+{% block content %}
+  <h1>Expense Report</h1>
+  <p><a href="/">&larr; Back to expenses</a></p>
+
+  <h3>Filter</h3>
+  <form method="get" action="/report">
+    From: <input type="date" name="start" value="{{ start }}">
+    To: <input type="date" name="end" value="{{ end }}">
+    Category:
+    <select name="category">
+      <option value="">All</option>
+      {% for c in categories %}
+        <option value="{{ c[0] }}" {% if c[0]|string == category %}selected{% endif %}>{{ c[1] }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit">Apply</button>
+    <a href="/report">Reset</a>
+  </form>
+
+  {% if empty %}
+    <p>No expenses found for this filter.</p>
+  {% else %}
+    <h3>Summary</h3>
+    <ul>
+      <li>Total spent: {{ stats.total }}</li>
+      <li>Number of expenses: {{ stats.count }}</li>
+      <li>Average expense: {{ stats.average }}</li>
+      <li>Median expense: {{ stats.median }}</li>
+      <li>Largest single expense: {{ stats.largest }}</li>
+      <li>Highest-spending category: {{ stats.top_category }}</li>
+      <li>Highest-spending month: {{ stats.top_month }}</li>
+    </ul>
+
+    <h3>Monthly Totals</h3>
+    <table>
+      <tr><th>Month</th><th>Total</th></tr>
+      {% for m in monthly %}<tr><td>{{ m[0] }}</td><td>{{ m[1] }}</td></tr>{% endfor %}
+    </table>
+
+    <h3>Category Breakdown</h3>
+    <table>
+      <tr><th>Category</th><th>Total</th><th>Share</th></tr>
+      {% for c in cats %}<tr><td>{{ c[0] }}</td><td>{{ c[1] }}</td><td>{{ c[2] }}%</td></tr>{% endfor %}
+    </table>
+
+    <h3>Charts</h3>
+    <img src="{{ url_for('static', filename='charts/pie.png') }}?v={{ stamp }}" width="450">
+    <img src="{{ url_for('static', filename='charts/bar.png') }}?v={{ stamp }}" width="450">
+  {% endif %}
+{% endblock %}

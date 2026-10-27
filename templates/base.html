@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Expense Tracker{% endblock %}</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #dbeafe;
+      color: #222;
+      max-width: 900px;
+      margin: 30px auto;
+      padding: 0 15px;
+    }
+    h1 { color: #1f4e79; }
+    h3 { margin-top: 30px; color: #1f4e79; }
+    a { color: #1f6fb2; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .msg {
+      background: #e3f1e6;
+      border-left: 4px solid #2e8b57;
+      padding: 8px 12px;
+      font-weight: bold;
+    }
+    form {
+      background: #ffffff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+      line-height: 2;
+    }
+    input, select {
+      padding: 6px;
+      border: 1px solid #bbb;
+      border-radius: 4px;
+    }
+    button {
+      background: #1f6fb2;
+      color: white;
+      border: none;
+      padding: 7px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover { background: #17578c; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #ffffff;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    }
+    th { background: #1f4e79; color: white; }
+    th, td { padding: 8px; border: 1px solid #ddd; text-align: left; }
+    tr:nth-child(even) { background: #f2f6fa; }
+    td form {
+      display: inline;
+      padding: 0;
+      background: none;
+      box-shadow: none;
+    }
+    td button { background: #c0392b; padding: 4px 10px; }
+    td button:hover { background: #962d22; }
+    img { max-width: 100%; margin: 10px 0; }
+  </style>
+</head>
+<body>
+  {% with messages = get_flashed_messages() %}
+    {% for m in messages %}<p class="msg">{{ m }}</p>{% endfor %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+</body>
+</html>

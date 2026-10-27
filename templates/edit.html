@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Edit Expense{% endblock %}
+
+{% block content %}
+  <h1>Edit Expense</h1>
+  <form method="post">
+    Date: <input type="date" name="expense_date" value="{{ e[1] }}" required><br>
+    Category:
+    <select name="category_id">
+      {% for c in categories %}
+        <option value="{{ c[0] }}" {% if c[0] == e[2] %}selected{% endif %}>{{ c[1] }}</option>
+      {% endfor %}
+    </select><br>
+    Amount: <input type="number" name="amount" step="0.01" min="0.01" value="{{ e[3] }}" required><br>
+    Description: <input type="text" name="description" value="{{ e[4] or '' }}"><br>
+    Payment:
+    <select name="payment_method">
+      {% for p in payments %}
+        <option {% if p == e[5] %}selected{% endif %}>{{ p }}</option>
+      {% endfor %}
+    </select><br>
+    <button type="submit">Save</button> <a href="/">Cancel</a>
+  </form>
+{% endblock %}

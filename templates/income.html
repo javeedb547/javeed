@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Income & Savings{% endblock %}
+
+{% block content %}
+  <h1>Income &amp; Savings</h1>
+  <p><a href="/">&larr; Back to expenses</a></p>
+
+  <h3>Add Income</h3>
+  <form method="post" action="/add_income">
+    Date: <input type="date" name="income_date" required><br>
+    Source: <input type="text" name="source" maxlength="100" placeholder="Salary, Pocket money..." required><br>
+    Amount: <input type="number" name="amount" step="0.01" min="0.01" required><br>
+    <button type="submit">Add Income</button>
+  </form>
+
+  <h3>Monthly Summary</h3>
+  <form method="get" action="/income">
+    Month: <input type="month" name="month" value="{{ month }}" required>
+    <button type="submit">View</button>
+  </form>
+
+  <table>
+    <tr><th>Income</th><th>Expenses</th><th>Savings</th><th>Savings rate</th></tr>
+    <tr>
+      <td>{{ summary.earned }}</td>
+      <td>{{ summary.spent }}</td>
+      <td style="font-weight:bold; color: {% if summary.negative %}#c0392b{% else %}#2e8b57{% endif %};">{{ summary.savings }}</td>
+      <td>{{ summary.rate }}</td>
+    </tr>
+  </table>
+
+  <h3>Income Records for {{ month }}</h3>
+  {% if rows %}
+    <table>
+      <tr><th>ID</th><th>Date</th><th>Source</th><th>Amount</th><th>Action</th></tr>
+      {% for r in rows %}
+      <tr>
+        <td>{{ r[0] }}</td><td>{{ r[1] }}</td><td>{{ r[2] }}</td><td>{{ r[3] }}</td>
+        <td>
+          <form method="post" action="/delete_income/{{ r[0] }}"
+                onsubmit="return confirm('Remove this income record?');">
+            <input type="hidden" name="month" value="{{ month }}">
+            <button type="submit">Remove</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    <p>No income recorded for {{ month }} yet.</p>
+  {% endif %}
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Monthly Budgets{% endblock %}
+
+{% block content %}
+  <h1>Monthly Budgets</h1>
+  <p><a href="/">&larr; Back to expenses</a></p>
+
+  <h3>Set a Budget</h3>
+  <form method="post" action="/set_budget">
+    Category:
+    <select name="category_id">
+      {% for c in categories %}
+        <option value="{{ c[0] }}">{{ c[1] }}</option>
+      {% endfor %}
+    </select><br>
+    Month: <input type="month" name="budget_month" value="{{ month }}" required><br>
+    Budget amount: <input type="number" name="amount" step="0.01" min="0.01" required><br>
+    <button type="submit">Save Budget</button>
+  </form>
+
+  <h3>Budget Status</h3>
+  <form method="get" action="/budgets">
+    Month: <input type="month" name="month" value="{{ month }}" required>
+    <button type="submit">View</button>
+  </form>
+
+  {% if rows %}
+    <table>
+      <tr><th>Category</th><th>Budget</th><th>Spent</th><th>Remaining</th>
+          <th>Used</th><th>Status</th><th>Action</th></tr>
+      {% for r in rows %}
+      <tr>
+        <td>{{ r.name }}</td>
+        <td>{{ r.budget }}</td>
+        <td>{{ r.spent }}</td>
+        <td>{{ r.remaining }}</td>
+        <td>{{ r.pct }}%</td>
+        <td style="font-weight:bold; color:
+          {% if r.status == 'Over budget' %}#c0392b
+          {% elif r.status == 'Near limit' %}#b9770e
+          {% else %}#2e8b57{% endif %};">{{ r.status }}</td>
+        <td>
+          <form method="post" action="/delete_budget/{{ r.id }}"
+                onsubmit="return confirm('Remove this budget?');">
+            <input type="hidden" name="month" value="{{ month }}">
+            <button type="submit">Remove</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    <p>No budgets set for {{ month }} yet.</p>
+  {% endif %}
+{% endblock %}

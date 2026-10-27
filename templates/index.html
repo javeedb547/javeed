@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Expense Tracker{% endblock %}
+
+{% block content %}
+  <h1>Expense Tracker</h1>
+  <p><a href="/report">View Report &amp; Charts</a> |
+     <a href="/budgets">Monthly Budgets</a> |
+     <a href="/income">Income &amp; Savings</a> |
+     <a href="/export/expenses.csv">Download CSV</a></p>
+
+  {% if warnings %}
+    <div style="background:#fff3cd; border-left:4px solid #e0a800; padding:10px 14px; margin:10px 0;">
+      <b>Budget alerts for {{ this_month }}</b>
+      <ul>
+        {% for w in warnings %}
+          <li>{{ w.name }}: {{ w.status }} (spent {{ w.spent }} of {{ w.budget }}, {{ w.pct }}%)</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  <h3>Add Expense</h3>
+  <form method="post" action="/add">
+    Date: <input type="date" name="expense_date" required><br>
+    Category:
+    <select name="category_id">
+      {% for c in categories %}
+        <option value="{{ c[0] }}">{{ c[1] }}</option>
+      {% endfor %}
+    </select><br>
+    Amount: <input type="number" name="amount" step="0.01" min="0.01" required><br>
+    Description: <input type="text" name="description"><br>
+    Payment:
+    <select name="payment_method">
+      {% for p in payments %}<option>{{ p }}</option>{% endfor %}
+    </select><br>
+    <button type="submit">Add</button>
+  </form>
+
+  <h3>Add New Category</h3>
+  <form method="post" action="/add_category">
+    Category name: <input type="text" name="category_name" maxlength="50" required>
+    <button type="submit">Add Category</button>
+  </form>
+
+  <h3>All Expenses</h3>
+  <form method="get" action="/">
+    Search: <input type="text" name="q" value="{{ q }}" placeholder="description or category">
+    <button type="submit">Search</button>
+    <a href="/">Clear</a>
+  </form>
+  {% if q %}
+    <p>Showing {{ expenses|length }} result(s) for "{{ q }}".</p>
+  {% endif %}
+
+  <table>
+    <tr><th>ID</th><th>Date</th><th>Category</th><th>Amount</th>
+        <th>Description</th><th>Payment</th><th>Actions</th></tr>
+    {% for e in expenses %}
+    <tr>
+      <td>{{ e[0] }}</td><td>{{ e[1] }}</td><td>{{ e[2] }}</td>
+      <td>{{ e[3] }}</td><td>{{ e[4] }}</td><td>{{ e[5] }}</td>
+      <td>
+        <a href="/edit/{{ e[0] }}">Edit</a>
+        <form method="post" action="/delete/{{ e[0] }}"
+              onsubmit="return confirm('Delete this expense?');">
+          <button type="submit">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+{% endblock %}
