@@ -1,6 +1,6 @@
 Flask
 gunicorn
-mysql-connector-python
+PyMySQL
 python-dotenv
 pandas
 numpy
