@@ -1,73 +1,710 @@
 {% extends "base.html" %}
-{% block title %}Expense Tracker{% endblock %}
+{% block title %}Dashboard | SpendSmart{% endblock %}
 
 {% block content %}
-  <h1>Expense Tracker</h1>
-  <p><a href="/report">View Report &amp; Charts</a> |
-     <a href="/budgets">Monthly Budgets</a> |
-     <a href="/income">Income &amp; Savings</a> |
-     <a href="/export/expenses.csv">Download CSV</a></p>
 
-  {% if warnings %}
-    <div style="background:#fff3cd; border-left:4px solid #e0a800; padding:10px 14px; margin:10px 0;">
-      <b>Budget alerts for {{ this_month }}</b>
-      <ul>
-        {% for w in warnings %}
-          <li>{{ w.name }}: {{ w.status }} (spent {{ w.spent }} of {{ w.budget }}, {{ w.pct }}%)</li>
-        {% endfor %}
-      </ul>
+<style>
+    .welcome {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 28px;
+    }
+
+    .welcome h1 {
+        font-size: 28px;
+        margin: 0 0 8px;
+    }
+
+    .welcome p {
+        color: var(--muted);
+        margin: 0;
+        font-size: 14px;
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
+        margin-bottom: 28px;
+    }
+
+    .stat-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 22px;
+        box-shadow: 0 4px 15px rgba(20,30,60,0.03);
+    }
+
+    .stat-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .stat-label {
+        font-size: 13px;
+        color: var(--muted);
+        font-weight: 600;
+    }
+
+    .stat-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        background: var(--hover);
+    }
+
+    .stat-value {
+        font-size: 26px;
+        font-weight: 800;
+        margin-top: 18px;
+        word-break: break-word;
+    }
+
+    .stat-note {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 7px;
+    }
+
+    .section-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 23px;
+        margin-bottom: 25px;
+    }
+
+    .section-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .section-heading h2 {
+        font-size: 18px;
+        margin: 0;
+    }
+
+    .section-heading p {
+        font-size: 12px;
+        color: var(--muted);
+        margin: 5px 0 0;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+    }
+
+    .form-group label {
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        min-height: 43px;
+    }
+
+    .full-width {
+        grid-column: 1 / -1;
+    }
+
+    .primary-btn {
+        background: var(--primary);
+        color: white;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 9px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .secondary-btn {
+        display: inline-block;
+        padding: 10px 15px;
+        background: var(--hover);
+        color: var(--primary);
+        border-radius: 9px;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .alert-box {
+        background: #fff4d8;
+        color: #805900;
+        border-left: 4px solid #e5a000;
+        border-radius: 10px;
+        padding: 16px;
+        margin-bottom: 22px;
+    }
+
+    .dark .alert-box {
+        background: #3a3020;
+        color: #ffdc91;
+    }
+
+    .alert-box ul {
+        margin-bottom: 0;
+    }
+
+    .search-form {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+        padding: 0;
+        border: none;
+        box-shadow: none;
+        background: transparent;
+    }
+
+    .search-form input {
+        flex: 1;
+        min-width: 180px;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+    }
+
+    .transaction-table {
+        min-width: 750px;
+    }
+
+    .amount {
+        font-weight: 700;
+    }
+
+    .action-links {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .action-links form {
+        display: inline;
+        padding: 0;
+        margin: 0;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+    }
+
+    .delete-btn {
+        background: #ffe8e8;
+        color: #d33;
+        padding: 7px 11px;
+        border-radius: 7px;
+    }
+
+    .empty-state {
+        text-align: center;
+        color: var(--muted);
+        padding: 30px;
+    }
+
+    @media(max-width: 950px) {
+        .dashboard-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media(max-width: 600px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .welcome h1 {
+            font-size: 23px;
+        }
+
+        .section-card {
+            padding: 16px;
+        }
+    }
+    /* Dashboard Charts */
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+    margin: 25px 0;
+}
+
+.chart-card {
+    background: var(--card, #ffffff);
+    border: 1px solid var(--border, #e5e7eb);
+    border-radius: 16px;
+    padding: 22px;
+    min-width: 0;
+}
+
+.chart-card h3 {
+    margin: 0 0 8px;
+    font-size: 18px;
+}
+
+.chart-card p {
+    margin: 0 0 18px;
+    color: var(--muted, #777);
+    font-size: 13px;
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+}
+
+@media (max-width: 800px) {
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+{% set stats = namespace(total=0, monthly=0, count=0) %}
+
+{% for e in expenses %}
+    {% set stats.total = stats.total + (e[3]|float) %}
+    {% set stats.count = stats.count + 1 %}
+
+    {% if e[1].strftime('%Y-%m') == this_month %}
+        {% set stats.monthly = stats.monthly + (e[3]|float) %}
+    {% endif %}
+{% endfor %}
+
+<!-- WELCOME -->
+<div class="welcome">
+    <div>
+        <h1>Welcome to SpendSmart 👋</h1>
+        <p>Here's an overview of your expense activity.</p>
     </div>
-  {% endif %}
 
-  <h3>Add Expense</h3>
-  <form method="post" action="/add">
-    Date: <input type="date" name="expense_date" required><br>
-    Category:
-    <select name="category_id">
-      {% for c in categories %}
-        <option value="{{ c[0] }}">{{ c[1] }}</option>
-      {% endfor %}
-    </select><br>
-    Amount: <input type="number" name="amount" step="0.01" min="0.01" required><br>
-    Description: <input type="text" name="description"><br>
-    Payment:
-    <select name="payment_method">
-      {% for p in payments %}<option>{{ p }}</option>{% endfor %}
-    </select><br>
-    <button type="submit">Add</button>
-  </form>
+    <a href="/export/expenses.csv" class="secondary-btn">
+        ↓ Download CSV
+    </a>
+</div>
 
-  <h3>Add New Category</h3>
-  <form method="post" action="/add_category">
-    Category name: <input type="text" name="category_name" maxlength="50" required>
-    <button type="submit">Add Category</button>
-  </form>
+<!-- SUMMARY CARDS -->
+<div class="dashboard-grid">
 
-  <h3>All Expenses</h3>
-  <form method="get" action="/">
-    Search: <input type="text" name="q" value="{{ q }}" placeholder="description or category">
-    <button type="submit">Search</button>
-    <a href="/">Clear</a>
-  </form>
-  {% if q %}
-    <p>Showing {{ expenses|length }} result(s) for "{{ q }}".</p>
-  {% endif %}
+    <div class="stat-card">
+        <div class="stat-top">
+            <span class="stat-label">Total Expenses</span>
+            <span class="stat-icon">💸</span>
+        </div>
+        <div class="stat-value">₹{{ "%.2f"|format(stats.total) }}</div>
+        <div class="stat-note">All recorded expenses</div>
+    </div>
 
-  <table>
-    <tr><th>ID</th><th>Date</th><th>Category</th><th>Amount</th>
-        <th>Description</th><th>Payment</th><th>Actions</th></tr>
-    {% for e in expenses %}
-    <tr>
-      <td>{{ e[0] }}</td><td>{{ e[1] }}</td><td>{{ e[2] }}</td>
-      <td>{{ e[3] }}</td><td>{{ e[4] }}</td><td>{{ e[5] }}</td>
-      <td>
-        <a href="/edit/{{ e[0] }}">Edit</a>
-        <form method="post" action="/delete/{{ e[0] }}"
-              onsubmit="return confirm('Delete this expense?');">
-          <button type="submit">Delete</button>
-        </form>
-      </td>
-    </tr>
-    {% endfor %}
-  </table>
+    <div class="stat-card">
+        <div class="stat-top">
+            <span class="stat-label">This Month</span>
+            <span class="stat-icon">📅</span>
+        </div>
+        <div class="stat-value">₹{{ "%.2f"|format(stats.monthly) }}</div>
+        <div class="stat-note">{{ this_month }} spending</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-top">
+            <span class="stat-label">Transactions</span>
+            <span class="stat-icon">🧾</span>
+        </div>
+        <div class="stat-value">{{ stats.count }}</div>
+        <div class="stat-note">Total recorded transactions</div>
+    </div>
+
+</div>
+<!-- DASHBOARD ANALYTICS -->
+<div class="charts-grid">
+
+    <!-- Income vs Expenses Chart -->
+    <div class="chart-card">
+        <h3>Income vs Expenses</h3>
+        <p>Monthly financial comparison</p>
+
+        <div class="chart-container">
+            <canvas id="incomeExpenseChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Spending by Category Chart -->
+    <div class="chart-card">
+        <h3>Spending by Category</h3>
+        <p>Understand where your money goes</p>
+
+        <div class="chart-container">
+            <canvas id="categoryChart"></canvas>
+        </div>
+    </div>
+
+</div>
+<!-- BUDGET ALERTS -->
+{% if warnings %}
+<div class="alert-box">
+    <strong>⚠ Budget alerts for {{ this_month }}</strong>
+
+    <ul>
+        {% for w in warnings %}
+        <li>
+            {{ w.name }} — {{ w.status }}:
+            ₹{{ w.spent }} of ₹{{ w.budget }} ({{ w.pct }}%)
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<!-- ADD EXPENSE -->
+<div class="section-card">
+
+    <div class="section-heading">
+        <div>
+            <h2>＋ Add New Expense</h2>
+            <p>Record your latest spending.</p>
+        </div>
+    </div>
+
+    <form method="post" action="/add">
+
+        <div class="form-grid">
+
+            <div class="form-group">
+                <label>Date</label>
+                <input type="date" name="expense_date" required>
+            </div>
+
+            <div class="form-group">
+                <label>Category</label>
+                <select name="category_id" required>
+                    {% for c in categories %}
+                    <option value="{{ c[0] }}">{{ c[1] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Amount (₹)</label>
+                <input type="number" name="amount"
+                       step="0.01" min="0.01"
+                       placeholder="Enter amount" required>
+            </div>
+
+            <div class="form-group">
+                <label>Payment Method</label>
+                <select name="payment_method" required>
+                    {% for p in payments %}
+                    <option value="{{ p }}">{{ p }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group full-width">
+                <label>Description</label>
+                <input type="text" name="description"
+                       placeholder="What did you spend on?">
+            </div>
+
+            <div class="full-width">
+                <button type="submit" class="primary-btn">
+                    + Add Expense
+                </button>
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+<!-- ADD CATEGORY -->
+<div class="section-card">
+
+    <div class="section-heading">
+        <div>
+            <h2>＋ Manage Categories</h2>
+            <p>Create a category for organizing your expenses.</p>
+        </div>
+    </div>
+
+    <form method="post" action="/add_category">
+        <div class="form-group">
+            <label>New Category Name</label>
+
+            <input type="text" name="category_name"
+                   maxlength="50"
+                   placeholder="Example: Shopping, Travel, Food"
+                   required>
+        </div>
+
+        <br>
+
+        <button type="submit" class="primary-btn">
+            Add Category
+        </button>
+    </form>
+
+</div>
+
+<!-- TRANSACTIONS -->
+<div class="section-card">
+
+    <div class="section-heading">
+        <div>
+            <h2>Recent Transactions</h2>
+            <p>View and manage your recorded expenses.</p>
+        </div>
+
+        <a href="/report" class="secondary-btn">
+            View Analytics →
+        </a>
+    </div>
+
+    <form method="get" action="/" class="search-form">
+        <input type="text" name="q"
+               value="{{ q }}"
+               placeholder="Search description or category">
+
+        <button type="submit">Search</button>
+
+        <a href="/">Clear</a>
+    </form>
+
+    {% if q %}
+        <p style="color:var(--muted);font-size:13px;margin:15px 0;">
+            Showing {{ expenses|length }} result(s) for "{{ q }}".
+        </p>
+    {% endif %}
+
+    <br>
+
+    <div class="table-wrapper">
+
+        <table class="transaction-table">
+
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Date</th>
+                    <th>Category</th>
+                    <th>Amount</th>
+                    <th>Description</th>
+                    <th>Payment</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for e in expenses %}
+                <tr>
+                    <td>#{{ e[0] }}</td>
+                    <td>{{ e[1] }}</td>
+                    <td>{{ e[2] }}</td>
+                    <td class="amount">₹{{ "%.2f"|format(e[3]|float) }}</td>
+                    <td>{{ e[4] }}</td>
+                    <td>{{ e[5] }}</td>
+
+                    <td>
+                        <div class="action-links">
+
+                            <a href="/edit/{{ e[0] }}">Edit</a>
+
+                            <form method="post"
+                                  action="/delete/{{ e[0] }}"
+                                  onsubmit="return confirm('Delete this expense?');">
+
+                                <button type="submit" class="delete-btn">
+                                    Delete
+                                </button>
+
+                            </form>
+
+                        </div>
+                    </td>
+                </tr>
+
+                {% else %}
+
+                <tr>
+                    <td colspan="7" class="empty-state">
+                        No expenses found. Add your first expense above!
+                    </td>
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+<!-- Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const incomeRows = {{ monthly_income | tojson }};
+    const expenseRows = {{ monthly_expenses | tojson }};
+    const categoryRows = {{ category_data | tojson }};
+
+    // Prepare monthly income and expense data
+    const monthlyMap = {};
+
+    incomeRows.forEach(function(row) {
+        monthlyMap[row[0]] = {
+            income: row[1],
+            expenses: 0
+        };
+    });
+
+    expenseRows.forEach(function(row) {
+        if (!monthlyMap[row[0]]) {
+            monthlyMap[row[0]] = {
+                income: 0,
+                expenses: row[1]
+            };
+        } else {
+            monthlyMap[row[0]].expenses = row[1];
+        }
+    });
+
+   const months = Object.keys(monthlyMap).sort();
+
+if (months.length === 0) {
+    months.push("No data");
+    monthlyMap["No data"] = {
+        income: 0,
+        expenses: 0
+    };
+}
+
+    const incomeValues = months.map(
+        month => monthlyMap[month].income
+    );
+
+    const expenseValues = months.map(
+        month => monthlyMap[month].expenses
+    );
+
+    // CHART 1: Income vs Expenses
+    const incomeCanvas = document.getElementById("incomeExpenseChart");
+
+    if (incomeCanvas) {
+        new Chart(incomeCanvas, {
+            type: "bar",
+
+            data: {
+                labels: months,
+
+                datasets: [
+                    {
+                        label: "Income",
+                        data: incomeValues,
+                        backgroundColor: "#16a34a",
+                        borderRadius: 6
+                    },
+                    {
+                        label: "Expenses",
+                        data: expenseValues,
+                        backgroundColor: "#ef4444",
+                        borderRadius: 6
+                    }
+                ]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                plugins: {
+                    legend: {
+                        position: "bottom"
+                    }
+                },
+
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+    // CHART 2: Spending by Category
+    const categoryCanvas = document.getElementById("categoryChart");
+
+    if (categoryCanvas && categoryRows.length > 0) {
+        new Chart(categoryCanvas, {
+            type: "doughnut",
+
+            data: {
+                labels: categoryRows.map(row => row[0]),
+
+                datasets: [{
+                    data: categoryRows.map(row => row[1]),
+
+                    backgroundColor: [
+                        "#6366f1",
+                        "#14b8a6",
+                        "#f59e0b",
+                        "#ef4444",
+                        "#8b5cf6",
+                        "#06b6d4",
+                        "#ec4899"
+                    ],
+
+                    borderWidth: 2
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                plugins: {
+                    legend: {
+                        position: "bottom"
+                    }
+                }
+            }
+        });
+
+    } else if (categoryCanvas) {
+        categoryCanvas.parentElement.innerHTML =
+            "<p>No expense data available yet. Add an expense to see your chart.</p>";
+    }
+
+});
+</script>
 {% endblock %}

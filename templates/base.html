@@ -1,74 +1,519 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}Expense Tracker{% endblock %}</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #dbeafe;
-      color: #222;
-      max-width: 900px;
-      margin: 30px auto;
-      padding: 0 15px;
-    }
-    h1 { color: #1f4e79; }
-    h3 { margin-top: 30px; color: #1f4e79; }
-    a { color: #1f6fb2; text-decoration: none; }
-    a:hover { text-decoration: underline; }
-    .msg {
-      background: #e3f1e6;
-      border-left: 4px solid #2e8b57;
-      padding: 8px 12px;
-      font-weight: bold;
-    }
-    form {
-      background: #ffffff;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-      line-height: 2;
-    }
-    input, select {
-      padding: 6px;
-      border: 1px solid #bbb;
-      border-radius: 4px;
-    }
-    button {
-      background: #1f6fb2;
-      color: white;
-      border: none;
-      padding: 7px 14px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    button:hover { background: #17578c; }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: #ffffff;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-    }
-    th { background: #1f4e79; color: white; }
-    th, td { padding: 8px; border: 1px solid #ddd; text-align: left; }
-    tr:nth-child(even) { background: #f2f6fa; }
-    td form {
-      display: inline;
-      padding: 0;
-      background: none;
-      box-shadow: none;
-    }
-    td button { background: #c0392b; padding: 4px 10px; }
-    td button:hover { background: #962d22; }
-    img { max-width: 100%; margin: 10px 0; }
-  </style>
-</head>
-<body>
-  {% with messages = get_flashed_messages() %}
-    {% for m in messages %}<p class="msg">{{ m }}</p>{% endfor %}
-  {% endwith %}
+<html lang="en">
 
-  {% block content %}{% endblock %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}SpendSmart{% endblock %}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #f5f7fb;
+            --card: #ffffff;
+            --text: #172033;
+            --muted: #8992a5;
+            --border: #e9edf4;
+            --primary: #6558f5;
+            --sidebar: #ffffff;
+            --hover: #f0efff;
+            --green: #16a675;
+            --red: #ed6262;
+        }
+
+        body.dark {
+            --bg: #101522;
+            --card: #1b2333;
+            --text: #f0f2f8;
+            --muted: #a0abc0;
+            --border: #303a4e;
+            --primary: #9288ff;
+            --sidebar: #171e2c;
+            --hover: #292b49;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .app-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR */
+
+        .sidebar {
+            width: 250px;
+            background: var(--sidebar);
+            border-right: 1px solid var(--border);
+            padding: 28px 18px;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 25px;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 5px 10px 40px;
+        }
+
+        .logo span {
+            color: var(--text);
+        }
+
+        .menu-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--muted);
+            letter-spacing: 1.5px;
+            margin: 15px 12px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            padding: 13px 14px;
+            margin: 4px 0;
+            border-radius: 10px;
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: var(--hover);
+            color: var(--primary);
+        }
+
+        .nav-icon {
+            font-size: 19px;
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+        }
+
+        /* MAIN CONTENT */
+
+        .main-area {
+            margin-left: 250px;
+            width: calc(100% - 250px);
+            min-width: 0;
+        }
+
+        .topbar {
+            height: 75px;
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 35px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .topbar h2 {
+            font-size: 18px;
+            margin: 0;
+        }
+
+        .top-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .theme-btn {
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 10px 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 17px;
+        }
+
+        /* USER PROFILE */
+
+        .profile {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--hover);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        .profile-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .logout-btn {
+            background: #ed6262;
+            color: white;
+            padding: 9px 13px;
+            border-radius: 8px;
+            font-size: 12px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .logout-btn:hover {
+            opacity: 0.85;
+        }
+
+        .content {
+            padding: 35px;
+            max-width: 1500px;
+            margin: auto;
+        }
+
+        .page-heading {
+            margin-bottom: 25px;
+        }
+
+        .page-heading h1 {
+            font-size: 27px;
+            margin: 0 0 8px;
+        }
+
+        .page-heading p {
+            color: var(--muted);
+            margin: 0;
+            font-size: 14px;
+        }
+
+        /* CARDS */
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 22px;
+            box-shadow: 0 4px 15px rgba(20, 30, 60, 0.03);
+        }
+
+        /* FORMS */
+
+        form {
+            background: var(--card);
+            color: var(--text);
+            padding: 20px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 15px rgba(20, 30, 60, 0.03);
+            line-height: 2;
+        }
+
+        input,
+        select,
+        textarea {
+            padding: 11px 13px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg);
+            color: var(--text);
+            font-family: inherit;
+            max-width: 100%;
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: inherit;
+        }
+
+        button:hover {
+            opacity: 0.88;
+        }
+
+        /* TABLES */
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--card);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(20, 30, 60, 0.03);
+        }
+
+        th {
+            background: var(--hover);
+            color: var(--primary);
+            font-size: 13px;
+        }
+
+        th,
+        td {
+            padding: 14px;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+        }
+
+        td {
+            font-size: 13px;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* LINKS */
+
+        a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        /* FLASH MESSAGES */
+
+        .msg {
+            background: var(--hover);
+            color: var(--text);
+            border-left: 4px solid var(--primary);
+            padding: 13px 16px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        img {
+            max-width: 100%;
+            border-radius: 12px;
+        }
+
+        /* MOBILE RESPONSIVE */
+
+        @media (max-width: 800px) {
+
+            .sidebar {
+                width: 75px;
+                padding: 20px 8px;
+            }
+
+            .logo {
+                font-size: 16px;
+                margin: 10px 0 35px;
+                text-align: center;
+            }
+
+            .logo span,
+            .menu-label,
+            .nav-text {
+                display: none;
+            }
+
+            .nav-link {
+                justify-content: center;
+                padding: 13px 5px;
+            }
+
+            .main-area {
+                margin-left: 75px;
+                width: calc(100% - 75px);
+            }
+
+            .content {
+                padding: 18px;
+            }
+
+            .topbar {
+                padding: 0 18px;
+            }
+
+            .page-heading h1 {
+                font-size: 22px;
+            }
+
+            .top-actions {
+                gap: 8px;
+            }
+
+            .profile-name {
+                display: none;
+            }
+
+            .logout-btn {
+                padding: 8px;
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="app-layout">
+
+        <!-- SIDEBAR -->
+
+        <aside class="sidebar">
+
+            <div class="logo">Spend<span>Smart.</span></div>
+
+            <div class="menu-label">MAIN MENU</div>
+
+            <a href="/" class="nav-link">
+                <span class="nav-icon">▦</span>
+                <span class="nav-text">Dashboard</span>
+            </a>
+
+            <a href="/" class="nav-link">
+                <span class="nav-icon">↔</span>
+                <span class="nav-text">Transactions</span>
+            </a>
+
+            <a href="/income" class="nav-link">
+                <span class="nav-icon">💰</span>
+                <span class="nav-text">Income</span>
+            </a>
+
+            <a href="/budgets" class="nav-link">
+                <span class="nav-icon">◉</span>
+                <span class="nav-text">Budgets</span>
+            </a>
+
+            <a href="/report" class="nav-link">
+                <span class="nav-icon">▥</span>
+                <span class="nav-text">Analytics & Reports</span>
+            </a>
+
+            <div class="sidebar-bottom">
+
+                <div class="menu-label">PREFERENCES</div>
+
+                <a href="#" class="nav-link" onclick="toggleTheme(); return false;">
+                    <span class="nav-icon">⚙</span>
+                    <span class="nav-text">Appearance</span>
+                </a>
+
+            </div>
+
+        </aside>
+
+        <!-- MAIN AREA -->
+
+        <div class="main-area">
+
+            <header class="topbar">
+
+                <h2>Overview</h2>
+
+                <div class="top-actions">
+
+                    <button class="theme-btn" onclick="toggleTheme()" id="themeButton">
+                        🌙
+                    </button>
+
+                    <!-- LOGGED-IN USER PROFILE -->
+
+                    <div class="profile">
+                        {{ session.get('username', 'U')[0]|upper }}
+                    </div>
+
+                    <span class="profile-name">
+                        {{ session.get('username', 'User') }}
+                    </span>
+
+                    <!-- LOGOUT BUTTON -->
+
+                    <a href="/logout" class="logout-btn">
+                        Logout
+                    </a>
+
+                </div>
+
+            </header>
+
+            <main class="content">
+
+                {% with messages = get_flashed_messages() %}
+
+                    {% for m in messages %}
+
+                        <div class="msg">
+                            {{ m }}
+                        </div>
+
+                    {% endfor %}
+
+                {% endwith %}
+
+                {% block content %}{% endblock %}
+
+            </main>
+
+        </div>
+
+    </div>
+
+    <!-- DARK MODE SCRIPT -->
+
+    <script>
+
+        function applyTheme(theme) {
+
+            document.body.classList.toggle("dark", theme === "dark");
+
+            document.getElementById("themeButton").textContent =
+                theme === "dark" ? "☀️" : "🌙";
+
+            localStorage.setItem("spendsmart-theme", theme);
+
+        }
+
+        function toggleTheme() {
+
+            const isDark = document.body.classList.contains("dark");
+
+            applyTheme(isDark ? "light" : "dark");
+
+        }
+
+        const savedTheme = localStorage.getItem("spendsmart-theme") || "light";
+
+        applyTheme(savedTheme);
+
+    </script>
+
 </body>
+
 </html>

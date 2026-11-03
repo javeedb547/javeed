@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - SpendSmart</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f5f7fb;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .login-box {
+            width: 400px;
+            max-width: 92%;
+            background: white;
+            padding: 35px;
+            border-radius: 18px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+        }
+
+        h1 {
+            text-align: center;
+            color: #6558f5;
+            margin-bottom: 8px;
+        }
+
+        p {
+            text-align: center;
+            color: #8992a5;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 18px;
+            border: 1px solid #e9edf4;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        button {
+            width: 100%;
+            padding: 13px;
+            background: #6558f5;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .bottom-text {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        a {
+            color: #6558f5;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .message {
+            background: #f0efff;
+            padding: 10px;
+            border-radius: 7px;
+            margin-bottom: 15px;
+            color: #6558f5;
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="login-box">
+
+        <h1>SpendSmart</h1>
+        <p>Welcome back! Login to manage your money.</p>
+
+        {% with messages = get_flashed_messages() %}
+            {% for message in messages %}
+                <div class="message">{{ message }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        <form method="POST" action="/login">
+
+            <label>Email</label>
+            <input type="email" name="email"
+                   placeholder="Enter your email"
+                   required>
+
+            <label>Password</label>
+            <input type="password" name="password"
+                   placeholder="Enter your password"
+                   required>
+
+            <button type="submit">Login</button>
+
+        </form>
+
+        <div class="bottom-text">
+            Don't have an account?
+            <a href="/signup">Create Account</a>
+        </div>
+
+    </div>
+
+</body>
+</html>
